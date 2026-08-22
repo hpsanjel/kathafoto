@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: theme('colors.ink.DEFAULT');
+    color: theme('colors.cream.DEFAULT');
+  }
+  ::selection {
+    background-color: theme('colors.brass.DEFAULT');
+    color: theme('colors.ink.DEFAULT');
+  }
+}
+
+@layer components {
+  /* Numbered frame marker used to open every section, echoing the circular logo badge */
+  .frame-mark {
+    @apply relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brass/60 font-display text-sm tracking-wide text-brass;
+  }
+  .frame-mark::before {
+    content: "";
+    @apply absolute inset-[-5px] rounded-full border border-brass/20;
+  }
+
+  /* Vertical filmstrip spine running down the page on larger screens */
+  .filmstrip-spine {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      theme('colors.brass.DEFAULT') 0,
+      theme('colors.brass.DEFAULT') 6px,
+      transparent 6px,
+      transparent 20px
+    );
+  }
+
+  /* Ticket-stub / boarding-pass shaped CTA card with perforated edge */
+  .ticket-stub {
+    position: relative;
+    background: theme('colors.ink.card');
+    border: 1px solid theme('colors.brass.DEFAULT' / 30%);
+  }
+  .ticket-stub::before,
+  .ticket-stub::after {
+    content: "";
+    position: absolute;
+    top: -12px;
+    width: 24px;
+    height: 24px;
+    background: theme('colors.ink.DEFAULT');
+    border: 1px solid theme('colors.brass.DEFAULT' / 30%);
+    border-radius: 9999px;
+  }
+  .ticket-stub::before {
+    left: -12px;
+  }
+  .ticket-stub::after {
+    right: -12px;
+  }
+  .ticket-perforation {
+    background-image: repeating-linear-gradient(
+      to right,
+      theme('colors.brass.DEFAULT' / 40%) 0,
+      theme('colors.brass.DEFAULT' / 40%) 6px,
+      transparent 6px,
+      transparent 14px
+    );
+    height: 1px;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-brass px-6 py-3.5 font-sans text-sm font-semibold tracking-wide text-ink transition hover:bg-brass-light active:scale-[0.98];
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-cream/30 px-6 py-3.5 font-sans text-sm font-semibold tracking-wide text-cream transition hover:border-brass hover:text-brass active:scale-[0.98];
+  }
+
+  /* Mobile scroll-snap gallery filmstrip */
+  .gallery-track {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .gallery-track::-webkit-scrollbar {
+    display: none;
+  }
+  .gallery-frame {
+    scroll-snap-align: center;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
