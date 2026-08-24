@@ -1,3 +1,14 @@
+// Hero video: only autoplay when the visitor hasn't asked for reduced motion — otherwise the poster image stands in as a static hero
+const heroVideo = document.getElementById("hero-video");
+if (heroVideo) {
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!prefersReducedMotion) {
+    heroVideo.play().catch(() => {
+      // Autoplay blocked (e.g. data-saver mode) — poster image remains visible, which is fine.
+    });
+  }
+}
+
 // Mobile nav overlay
 const navToggle = document.getElementById("nav-toggle");
 const navClose = document.getElementById("nav-close");
@@ -32,16 +43,35 @@ const revealObserver = new IntersectionObserver(
 );
 revealEls.forEach((el) => revealObserver.observe(el));
 
-// Gallery lightbox
-const galleryFrames = document.querySelectorAll("[data-gallery-frame]");
+// Gallery lightbox — each frame represents a category with its own set of photos
+const galleryCategories = document.querySelectorAll("[data-gallery-category]");
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightbox-img");
 const lightboxCaption = document.getElementById("lightbox-caption");
+const lightboxCounter = document.getElementById("lightbox-counter");
 const lightboxClose = document.getElementById("lightbox-close");
+const lightboxPrev = document.getElementById("lightbox-prev");
+const lightboxNext = document.getElementById("lightbox-next");
 
-function openLightbox(src, caption) {
-  lightboxImg.src = src;
-  lightboxCaption.textContent = caption || "";
+let currentImages = [];
+let currentTitle = "";
+let currentIndex = 0;
+
+function renderLightboxImage() {
+  const total = currentImages.length;
+  lightboxImg.src = currentImages[currentIndex];
+  lightboxImg.alt = `${currentTitle} — photo ${currentIndex + 1} of ${total}`;
+  lightboxCaption.textContent = currentTitle;
+  lightboxCounter.textContent = total > 1 ? `(${currentIndex + 1}/${total})` : "";
+  const showNav = total > 1;
+  lightboxPrev.classList.toggle("hidden", !showNav);
+  lightboxNext.classList.toggle("hidden", !showNav);
+}
+function openLightbox(images, title, startIndex = 0) {
+  currentImages = images;
+  currentTitle = title;
+  currentIndex = startIndex;
+  renderLightboxImage();
   lightbox.classList.remove("pointer-events-none", "opacity-0");
   lightbox.classList.add("opacity-100");
   document.body.classList.add("overflow-hidden");
@@ -52,13 +82,27 @@ function closeLightbox() {
   document.body.classList.remove("overflow-hidden");
   lightboxImg.src = "";
 }
-galleryFrames.forEach((frame) => {
+function showPrev() {
+  if (!currentImages.length) return;
+  currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
+  renderLightboxImage();
+}
+function showNext() {
+  if (!currentImages.length) return;
+  currentIndex = (currentIndex + 1) % currentImages.length;
+  renderLightboxImage();
+}
+
+galleryCategories.forEach((frame) => {
   frame.addEventListener("click", () => {
-    const img = frame.querySelector("img");
-    openLightbox(img.src, img.alt);
+    const images = JSON.parse(frame.dataset.images || "[]");
+    const title = frame.dataset.title || "";
+    openLightbox(images, title, 0);
   });
 });
 lightboxClose?.addEventListener("click", closeLightbox);
+lightboxPrev?.addEventListener("click", showPrev);
+lightboxNext?.addEventListener("click", showNext);
 lightbox?.addEventListener("click", (e) => {
   if (e.target === lightbox) closeLightbox();
 });
@@ -67,6 +111,9 @@ document.addEventListener("keydown", (e) => {
     closeLightbox();
     closeNav();
   }
+  if (!lightbox.classList.contains("opacity-100")) return;
+  if (e.key === "ArrowLeft") showPrev();
+  if (e.key === "ArrowRight") showNext();
 });
 
 // Contact form via Web3Forms

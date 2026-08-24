@@ -90,6 +90,14 @@
   .gallery-frame {
     scroll-snap-align: center;
   }
+  .gallery-count {
+    @apply pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 to-transparent px-4 pb-3 pt-8 text-left font-sans text-xs font-medium tracking-wide text-cream/90;
+  }
+
+  /* Lightbox prev/next controls */
+  .lightbox-nav {
+    @apply absolute top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-cream/20 text-cream transition hover:border-brass hover:text-brass;
+  }
 
   .reveal {
     opacity: 0;
